@@ -3,9 +3,10 @@
   "version": "1.0.0",
   "description": "an avalone app",
   "repository": "git@github.com:MapleYin/avalon_core.git",
-  "author": "yinheng <yinheng@staff.weibo.com>",
+  "author": "Heng Yin <maple1058@hotmail.com>",
   "license": "MIT",
   "scripts": {
+    "prepare": "yarn build",
     "build": "tsup",
     "test": "jest --verbose"
   },
