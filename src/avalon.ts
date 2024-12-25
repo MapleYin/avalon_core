@@ -15,7 +15,6 @@ import { randomArray, randomNumberFormRange } from "./tools"
  * @property {{ key: TCharacterKey, alignment: TAlignment }[]} players - The list of players, including their character keys and alignments.
  */
 export type TAvalon = {
-    rule: TRule,
     quests: TQuest[]
     stage: "quest" | "team" | "ladyOfTheLake" | "excalibur" | "assassinate" | "end",
     result?: "goodWin" | "evilWin"
@@ -30,29 +29,21 @@ type TConfig = {
     enableExcalibur?: true
 }
 
-export const Create = (config: TConfig): TAvalon => {
-    const rule = defaultRuleForNumberOfPlayer(config.numberOfPlayer)
-    if (!rule) {
-        throw new Error("Invalid number of player")
-    }
-    if (typeof config.lancelot === "string" && (!["rule1", "rule2", "rule3"].includes(config.lancelot) || config.numberOfPlayer < 7)) {
+export const Create = (rule: TRule): TAvalon => {
+    if (typeof rule.lancelot === "string" && (!["rule1", "rule2", "rule3"].includes(rule.lancelot) || rule.numberOfPlayer < 7)) {
         throw new Error("Invalid lancelot config")
     }
     const randomCharacters = randomArray(rule.characters)
     let lancelotSwitch: boolean[] | undefined
-    if (config.lancelot === "rule1") {
+    if (rule.lancelot === "rule1") {
         lancelotSwitch = RandomLancelotSwitchForRule1()
-    } else if (config.lancelot === "rule2") {
+    } else if (rule.lancelot === "rule2") {
         lancelotSwitch = RandomLancelotSwitchForRule2()
-    } else if (config.lancelot === "rule3") {
+    } else if (rule.lancelot === "rule3") {
         rule.characterVisibilitiesRules.push(lancelotVisibilityRule)
     }
-    rule.lancelot = config.lancelot
-    rule.hasLadyOfTheLake = config.hasLadyOfTheLake
-    rule.enableExcalibur = config.enableExcalibur
-    const firstLeader = randomNumberFormRange(0, config.numberOfPlayer - 1)
+    const firstLeader = randomNumberFormRange(0, rule.numberOfPlayer - 1)
     return {
-        rule,
         quests: CreateQuests(rule, firstLeader),
         stage: "team",
         players: randomCharacters.map(characterKey => {
@@ -95,18 +86,16 @@ export const UpdateRecentTeamMember = (avalon: TAvalon, members: TTeam["members"
  * 6. If a new team cannot be created, sets the game result to "evilWin" and updates the stage to "end".
  * 7. If a new team can be created, updates the game stage to "team" and creates the next team.
  */
-export const UpdateRecentTeamVote = (avalon: TAvalon, votes: TTeam["votes"]) => {
+export const UpdateRecentTeamVote = (avalon: TAvalon, rule: TRule, votes: TTeam["votes"]) => {
     const quest = InProgressQuest(avalon.quests)
     const team = RecentTeam(avalon.quests)
     if (!quest || !team) {
         throw new Error("No in progress quest or team")
     }
-    if (votes.length != avalon.rule.numberOfPlayer) {
+    if (votes.length != rule.numberOfPlayer) {
         throw new Error("Invalid vote count")
     }
     team.votes = votes
-
-    const rule = avalon.rule
 
     const isTeamApproved = votes.filter(item => item.vote).length * 2 > rule.numberOfPlayer
 
@@ -142,17 +131,17 @@ export const UpdateRecentTeamVote = (avalon: TAvalon, votes: TTeam["votes"]) => 
  * 5. Checks if the game has ended by counting the number of successful and failed quests.
  * 6. Updates the game stage based on the results of the quests and game rules.
  */
-export const UpdateResentQuestVote = (avalon: TAvalon, votes: boolean[]) => {
+export const UpdateResentQuestVote = (avalon: TAvalon, rule: TRule, votes: boolean[]) => {
     const quest = InProgressQuest(avalon.quests)
     if (!quest) {
         throw new Error("No in progress quest")
     }
     const questIdx = avalon.quests.indexOf(quest)
-    if (votes.length != avalon.rule.quest.each[questIdx].numberOfMebers) {
+    if (votes.length != rule.quest.each[questIdx].numberOfMebers) {
         throw new Error("Invalid vote count")
     }
     const failuerCount = votes.filter(vote => !vote).length
-    const needTwoFailure = avalon.rule.quest.each[questIdx].needTwoFailure
+    const needTwoFailure = rule.quest.each[questIdx].needTwoFailure
     const failed = failuerCount >= (needTwoFailure ? 2 : 1)
 
     quest.result = {
@@ -171,12 +160,12 @@ export const UpdateResentQuestVote = (avalon: TAvalon, votes: boolean[]) => {
         avalon.result = "evilWin"
         avalon.stage = "end"
     } else {
-        if (avalon.rule.hasLadyOfTheLake && questIdx >= 1 && typeof quest.nextLadyOfTheLake != "number") {
+        if (rule.hasLadyOfTheLake && questIdx >= 1 && typeof quest.nextLadyOfTheLake != "number") {
             avalon.stage = "ladyOfTheLake"
         } else {
             avalon.stage = "team"
             avalon.quests[questIdx + 1].state = "inProgress"
-            CreateNextTeam(avalon.quests, avalon.rule)
+            CreateNextTeam(avalon.quests, rule)
         }
     }
 }
@@ -189,7 +178,7 @@ export const UpdateResentQuestVote = (avalon: TAvalon, votes: boolean[]) => {
  * @throws Will throw an error if there is no last finished quest.
  * @throws Will throw an error if the next Lady of the Lake has already been a Lady of the Lake.
  */
-export const SetNextLadyOfTheLake = (avalon: TAvalon, nextLadyOfTheLake: number) => {
+export const SetNextLadyOfTheLake = (avalon: TAvalon, rule: TRule, nextLadyOfTheLake: number) => {
     const lastFinishedQuest = LastFinishedQuest(avalon.quests)
     if (!lastFinishedQuest) {
         throw new Error("No last finished quest")
@@ -202,5 +191,5 @@ export const SetNextLadyOfTheLake = (avalon: TAvalon, nextLadyOfTheLake: number)
     lastFinishedQuest.nextLadyOfTheLake = nextLadyOfTheLake
     avalon.stage = "team"
     avalon.quests[questIdx + 1].state = "inProgress"
-    CreateNextTeam(avalon.quests, avalon.rule)
+    CreateNextTeam(avalon.quests, rule)
 }

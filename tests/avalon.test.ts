@@ -1,6 +1,6 @@
 import { Create, UpdateRecentTeamMember, UpdateRecentTeamVote, UpdateResentQuestVote, SetNextLadyOfTheLake, TAvalon } from "../src/avalon"
 import { TQuest, TTeam } from "../src/quest"
-import { TRule } from "../src/rule"
+import { defaultRuleForNumberOfPlayer, TRule } from "../src/rule"
 
 const createTeamVotes = (count: number, success: boolean): TTeam["votes"] => {
     let maxSuccessCount = success ? Math.floor(count / 2) + 1 : Math.floor(count / 2)
@@ -13,49 +13,19 @@ type TStep = {
     teamVotes: TTeam["votes"]
     questVotes: boolean[]
 }
-const runQuest = (game: TAvalon, step: TStep[]) => {
+const runQuest = (game: TAvalon, rule: TRule, step: TStep[]) => {
     step.forEach(({ member, teamVotes, questVotes }) => {
         UpdateRecentTeamMember(game, member)
-        UpdateRecentTeamVote(game, teamVotes)
-        UpdateResentQuestVote(game, questVotes)
+        UpdateRecentTeamVote(game, rule, teamVotes)
+        UpdateResentQuestVote(game, rule, questVotes)
     })
 }
 
 describe("Avalon Game", () => {
-    const mockRule: TRule = {
-        numberOfPlayer: 7,
-        characters: ["merlin", "percival", "loyalServant", "loyalServant", "morgana", "assassin", "oberon"],
-        quest: {
-            each: [
-                { numberOfMebers: 2 },
-                { numberOfMebers: 3 },
-                { numberOfMebers: 3 },
-                { numberOfMebers: 4, needTwoFailure: true },
-                { numberOfMebers: 4 }
-            ],
-            team: {
-                maxCountOfSummonTeam: 5,
-                mode: "each"
-            }
-        },
-        characterVisibilitiesRules: [{
-            title: "可看到的坏人",
-            characters: ["merlin"],
-            canSee: ["morgana", "minion", "assassin", "oberon", "lancelot_evil"]
-        }, {
-            title: "梅林/莫甘娜",
-            characters: ["percival"],
-            canSee: ["merlin", "morgana"]
-        }, {
-            title: "可看到的队友",
-            characters: ["morgana", "assassin", "mordred", "minion"],
-            canSee: ["morgana", "assassin", "mordred", "minion", "lancelot_evil"]
-        }]
-    }
 
     it("should create a new Avalon game", () => {
-        const game = Create({ numberOfPlayer: 7 })
-        expect(game.rule).toEqual(mockRule)
+        const rule = defaultRuleForNumberOfPlayer(7)!
+        const game = Create(rule)
         expect(game.quests.length).toBe(5)
         expect(game.stage).toBe("team")
         expect(game.players.length).toBe(7)
@@ -63,49 +33,52 @@ describe("Avalon Game", () => {
     })
 
     it("should update recent team members", () => {
-        const game = Create({ numberOfPlayer: 5 })
+        const rule = defaultRuleForNumberOfPlayer(5)!
+        const game = Create(rule)
         const members = [0, 1]
         UpdateRecentTeamMember(game, members)
         expect(game.quests[0].teams[0].members).toEqual(members)
     })
 
     it("should update recent team vote", () => {
-        const config = { numberOfPlayer: 5 }
-        const game = Create(config)
-        const votes = createTeamVotes(config.numberOfPlayer, false)
+        const rule = defaultRuleForNumberOfPlayer(5)!
+        const game = Create(rule)
+        const votes = createTeamVotes(rule.numberOfPlayer, false)
         UpdateRecentTeamMember(game, [0, 1])
-        UpdateRecentTeamVote(game, votes)
+        UpdateRecentTeamVote(game, rule, votes)
         expect(game.quests[0].teams[0].votes).toEqual(votes)
         expect(game.stage).toBe("team")
     })
 
     it("should update recent quest vote", () => {
-        const config = { numberOfPlayer: 5 }
-        const game = Create(config)
-        const teamVotes = createTeamVotes(config.numberOfPlayer, true)
+        const rule = defaultRuleForNumberOfPlayer(5)!
+        const game = Create(rule)
+        const teamVotes = createTeamVotes(rule.numberOfPlayer, true)
         const votes = [true, false]
         UpdateRecentTeamMember(game, [0, 1])
-        UpdateRecentTeamVote(game, teamVotes)
-        UpdateResentQuestVote(game, votes)
+        UpdateRecentTeamVote(game, rule, teamVotes)
+        UpdateResentQuestVote(game, rule, votes)
         expect(game.quests[0].result?.votes).toEqual(votes)
         expect(game.quests[0].state).toBe("finished")
     })
 
     it("should set next Lady of the Lake", () => {
-        const game = Create({ numberOfPlayer: 5, hasLadyOfTheLake: true })
+        const rule = defaultRuleForNumberOfPlayer(5)!
+        rule.hasLadyOfTheLake = true
+        const game = Create(rule)
         const nextLadyOfTheLake = 2
 
-        runQuest(game, [{
+        runQuest(game, rule, [{
             member: [0, 1],
-            teamVotes: createTeamVotes(game.rule.numberOfPlayer, true),
+            teamVotes: createTeamVotes(rule.numberOfPlayer, true),
             questVotes: [true, false]
         }, {
             member: [2, 3, 1],
-            teamVotes: createTeamVotes(game.rule.numberOfPlayer, true),
+            teamVotes: createTeamVotes(rule.numberOfPlayer, true),
             questVotes: [true, false, true]
         }])
         expect(game.stage).toBe("ladyOfTheLake")
-        SetNextLadyOfTheLake(game, nextLadyOfTheLake)
+        SetNextLadyOfTheLake(game, rule, nextLadyOfTheLake)
         expect(game.quests[1].nextLadyOfTheLake).toBe(nextLadyOfTheLake)
         expect(game.stage).toBe("team")
     })
