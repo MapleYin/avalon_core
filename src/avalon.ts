@@ -22,13 +22,6 @@ export type TAvalon = {
     players: { key: TCharacterKey, alignment: TAlignment }[]
 }
 
-type TConfig = {
-    numberOfPlayer: number
-    lancelot?: TRule["lancelot"]
-    hasLadyOfTheLake?: true
-    enableExcalibur?: true
-}
-
 export const Create = (rule: TRule): TAvalon => {
     if (typeof rule.lancelot === "string" && (!["rule1", "rule2", "rule3"].includes(rule.lancelot) || rule.numberOfPlayer < 7)) {
         throw new Error("Invalid lancelot config")
