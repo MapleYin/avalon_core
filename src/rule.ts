@@ -17,6 +17,11 @@ export type TRule = {
     characters: TCharacterKey[];
 
     /**
+     * The key of the assassin character.
+     */
+    assassin: TCharacterKey;
+
+    /**
      * The visibility rules for the characters.
      */
     characterVisibilitiesRules: TVisibilityRule[];
@@ -110,6 +115,7 @@ export const defaultRuleForNumberOfPlayer = (numberOfPlayer: number): TRule | un
         return
     }
     return {
+        assassin: "assassin",
         characters: rule.characters,
         numberOfPlayer,
         characterVisibilitiesRules: defaultVisibilityRules,

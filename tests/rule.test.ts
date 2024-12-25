@@ -5,6 +5,7 @@ describe('defaultRuleForNumberOfPlayer', () => {
         const expectedRule: TRule = {
             characters: ["merlin", "percival", "loyalServant", "morgana", "assassin"],
             numberOfPlayer: 5,
+            assassin: "assassin",
             characterVisibilitiesRules: [{
                 title: "可看到的坏人",
                 characters: ["merlin"],
@@ -39,6 +40,7 @@ describe('defaultRuleForNumberOfPlayer', () => {
         const expectedRule: TRule = {
             characters: ["merlin", "percival", "loyalServant", "loyalServant", "morgana", "assassin", "oberon"],
             numberOfPlayer: 7,
+            assassin: "assassin",
             characterVisibilitiesRules: [{
                 title: "可看到的坏人",
                 characters: ["merlin"],
