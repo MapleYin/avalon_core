@@ -272,3 +272,12 @@ const innerRules: TInnerRule[] = [{
         { numberOfMebers: 6 }
     ]
 }]
+
+/**
+ * Gets the number of players that are supported.
+ * @param hasLancelot Indicates if Lancelot is present.
+ * @returns The number of players that are supported.
+ */
+export const SupportNumberOfPlayer = (hasLancelot: boolean = false) => {
+    return innerRules.filter(i => i.hasLancelot === hasLancelot).map(i => i.numberOfPlayer)
+}
