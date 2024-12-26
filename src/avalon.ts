@@ -73,8 +73,18 @@ export const UpdateRecentTeamMember = (avalon: TAvalon, members: TTeam["members"
         throw new Error("Invalid stage")
     }
     const team = RecentTeam(avalon.quests)
-    if (!team) {
-        return
+    const quest = InProgressQuest(avalon.quests)
+    if (!quest || !team) {
+        throw new Error("No in progress quest or team")
+    }
+    if (quest.numberOfMembers != members.length) {
+        throw new Error("Invalid number of team members")
+    }
+
+    const containInvalidMember = members.some(v => typeof v != "number" || v >= avalon.players.length || v < 0)
+
+    if (containInvalidMember) {
+        throw new Error("Invalid team members")
     }
     team.members = members
 }
