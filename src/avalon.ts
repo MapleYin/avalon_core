@@ -16,10 +16,11 @@ import { randomArray, randomNumberFormRange } from "./tools"
  */
 export type TAvalon = {
     quests: TQuest[]
-    stage: "quest" | "team" | "ladyOfTheLake" | "excalibur" | "assassinate" | "end",
+    stage: "quest" | "team" | "ladyOfTheLake" | "assassinate" | "end",
     result?: "goodWin" | "evilWin"
     lancelotSwitch?: boolean[]
     players: { key: TCharacterKey, alignment: TAlignment }[]
+    kill?: number
 }
 
 /**
@@ -68,6 +69,9 @@ export const Create = (rule: TRule): TAvalon => {
  * @returns The updated Avalon game state object.
  */
 export const UpdateRecentTeamMember = (avalon: TAvalon, members: TTeam["members"]) => {
+    if (avalon.stage !== "team") {
+        throw new Error("Invalid stage")
+    }
     const team = RecentTeam(avalon.quests)
     if (!team) {
         return
@@ -94,6 +98,9 @@ export const UpdateRecentTeamMember = (avalon: TAvalon, members: TTeam["members"
  * 7. If a new team can be created, updates the game stage to "team" and creates the next team.
  */
 export const UpdateRecentTeamVote = (avalon: TAvalon, rule: TRule, votes: TTeam["votes"]) => {
+    if (avalon.stage !== "team") {
+        throw new Error("Invalid stage")
+    }
     const quest = InProgressQuest(avalon.quests)
     const team = RecentTeam(avalon.quests)
     if (!quest || !team) {
@@ -139,6 +146,9 @@ export const UpdateRecentTeamVote = (avalon: TAvalon, rule: TRule, votes: TTeam[
  * 6. Updates the game stage based on the results of the quests and game rules.
  */
 export const UpdateResentQuestVote = (avalon: TAvalon, rule: TRule, votes: boolean[]) => {
+    if (avalon.stage !== "quest") {
+        throw new Error("Invalid stage")
+    }
     const quest = InProgressQuest(avalon.quests)
     if (!quest) {
         throw new Error("No in progress quest")
@@ -186,6 +196,9 @@ export const UpdateResentQuestVote = (avalon: TAvalon, rule: TRule, votes: boole
  * @throws Will throw an error if the next Lady of the Lake has already been a Lady of the Lake.
  */
 export const SetNextLadyOfTheLake = (avalon: TAvalon, rule: TRule, nextLadyOfTheLake: number) => {
+    if (avalon.stage !== "ladyOfTheLake") {
+        throw new Error("Invalid stage")
+    }
     const lastFinishedQuest = LastFinishedQuest(avalon.quests)
     if (!lastFinishedQuest) {
         throw new Error("No last finished quest")
@@ -210,9 +223,49 @@ export const SetNextLadyOfTheLake = (avalon: TAvalon, rule: TRule, nextLadyOfThe
  * @throws Will throw an error if there is no recent team.
  */
 export const SetExcalibur = (avalon: TAvalon, excalibur: number) => {
+    if (avalon.stage !== "team") {
+        throw new Error("Invalid stage")
+    }
     const recentTeam = RecentTeam(avalon.quests)
     if (!recentTeam) {
         throw new Error("No recent team")
     }
     recentTeam.excalibur = excalibur
+}
+
+
+/**
+ * Executes the assassination phase in the Avalon game.
+ * 
+ * @param avalon - The current state of the Avalon game.
+ * @param kill - The index of the player to be assassinated.
+ * 
+ * @throws {Error} If the current stage is not "assassinate".
+ * 
+ * @remarks
+ * This function updates the game state by setting the `kill` property to the index of the targeted player,
+ * changing the stage to "end", and determining the result of the game based on whether the targeted player
+ * is Merlin.
+ * 
+ * @example
+ * ```typescript
+ * const avalonGame = {
+ *   stage: "assassinate",
+ *   players: [{ key: "merlin" }, { key: "percival" }, { key: "morgana" }],
+ *   kill: null,
+ *   result: null
+ * };
+ * 
+ * assassinate(avalonGame, 0);
+ * console.log(avalonGame.result); // "evilWin"
+ * ```
+ */
+export const assassinate = (avalon: TAvalon, kill: number) => {
+    if (avalon.stage !== "assassinate") {
+        throw new Error("Invalid stage")
+    }
+    avalon.kill = kill
+    const target = avalon.players[kill]
+    avalon.stage = "end"
+    avalon.result = target.key === "merlin" ? "evilWin" : "goodWin"
 }
