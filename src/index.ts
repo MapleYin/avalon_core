@@ -6,6 +6,7 @@ export { defaultRuleForNumberOfPlayer as DefaultRuleForNumberOfPlayer } from "./
 export const RecentTeam = (avalon: TAvalon) => {
     return recentTeam(avalon.quests)
 }
+export { Characters, TAlignment, TCharacterKey } from "./character"
 export type { TAvalon } from "./avalon"
 export type { TQuest, TTeam } from "./quest"
 export type { TRule } from "./rule"
