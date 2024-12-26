@@ -243,6 +243,9 @@ export const SetExcalibur = (avalon: TAvalon, excalibur: number) => {
     recentTeam.excalibur = excalibur
 }
 
+export const ChangeToAssassinate = (avalon: TAvalon) => {
+    avalon.stage = "assassinate"
+}
 
 /**
  * Executes the assassination phase in the Avalon game.

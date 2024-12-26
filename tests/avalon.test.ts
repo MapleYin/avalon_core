@@ -1,4 +1,4 @@
-import { Create, UpdateRecentTeamMember, UpdateRecentTeamVote, UpdateResentQuestVote, SetNextLadyOfTheLake, TAvalon } from "../src/avalon"
+import { Create, UpdateRecentTeamMember, UpdateRecentTeamVote, UpdateResentQuestVote, SetNextLadyOfTheLake, TAvalon, Assassinate } from "../src/avalon"
 import { TQuest, TTeam } from "../src/quest"
 import { defaultRuleForNumberOfPlayer, TRule } from "../src/rule"
 
@@ -164,5 +164,31 @@ describe("Avalon Game", () => {
         expect(game.lancelotSwitch).toBeDefined()
         expect(game.players.find(player => player.key === "lancelot_good")).toBeDefined()
         expect(game.players.find(player => player.key === "lancelot_evil")).toBeDefined()
+    })
+
+    it("kill merlin, evil should win", () => {
+        const rule = defaultRuleForNumberOfPlayer(7, "rule1")!
+        const game = Create(rule)
+
+        runQuest(game, rule, [{
+            member: [0, 1],
+            teamVotes: createTeamVotes(rule.numberOfPlayer, true),
+            questVotes: [true, true]
+        }, {
+            member: [2, 3, 1],
+            teamVotes: createTeamVotes(rule.numberOfPlayer, true),
+            questVotes: [true, true, true]
+        }, {
+            member: [2, 3, 1],
+            teamVotes: createTeamVotes(rule.numberOfPlayer, true),
+            questVotes: [true, true, true]
+        }])
+
+        const killTarget = game.players.findIndex(i => i.key === "merlin")
+
+        Assassinate(game, killTarget)
+
+        expect(game.result).toBe("evilWin")
+        expect(game.stage).toBe("end")
     })
 })
