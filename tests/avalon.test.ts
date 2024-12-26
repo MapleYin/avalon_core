@@ -26,7 +26,7 @@ const runQuest = (game: TAvalon, rule: TRule, step: TStep[]) => {
 describe("Avalon Game", () => {
 
     it("should create a new Avalon game", () => {
-        const rule = defaultRuleForNumberOfPlayer(7)!
+        const rule = defaultRuleForNumberOfPlayer(7)
         const game = Create(rule)
         expect(game.quests.length).toBe(5)
         expect(game.stage).toBe("team")
@@ -35,7 +35,7 @@ describe("Avalon Game", () => {
     })
 
     it("should update recent team members", () => {
-        const rule = defaultRuleForNumberOfPlayer(5)!
+        const rule = defaultRuleForNumberOfPlayer(5)
         const game = Create(rule)
         const members = [0, 1]
         UpdateRecentTeamMember(game, members)

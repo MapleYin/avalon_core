@@ -109,12 +109,15 @@ export const lancelotVisibilityRule: TVisibilityRule = {
     canSee: ["lancelot_good", "lancelot_evil"]
 }
 
-export const defaultRuleForNumberOfPlayer = (numberOfPlayer: number, lancelotRule?: TRule["lancelot"]): TRule | undefined => {
+export const defaultRuleForNumberOfPlayer = (numberOfPlayer: number, lancelotRule?: TRule["lancelot"]) => {
+    if (lancelotRule && !["rule1", "rule2", "rule3"].includes(lancelotRule)) {
+        throw new Error("error lancelot rule")
+    }
     const rule = innerRules.find(item => item.numberOfPlayer === numberOfPlayer && (lancelotRule ? item.hasLancelot : true))
     if (!rule) {
-        return
+        throw new Error(`no suit rule for numberOfPlayer:${numberOfPlayer} lancelotRule:${lancelotRule}`)
     }
-    return {
+    const result: TRule = {
         assassin: rule.assassinate || "assassin",
         characters: rule.characters,
         numberOfPlayer,
@@ -128,6 +131,7 @@ export const defaultRuleForNumberOfPlayer = (numberOfPlayer: number, lancelotRul
             each: rule.quests
         }
     }
+    return result
 }
 
 type TInnerRule = {

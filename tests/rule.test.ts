@@ -71,7 +71,9 @@ describe('defaultRuleForNumberOfPlayer', () => {
         expect(defaultRuleForNumberOfPlayer(7)).toEqual(expectedRule);
     });
 
-    it('should return undefined for an unsupported number of players', () => {
-        expect(defaultRuleForNumberOfPlayer(4)).toBeUndefined();
+    it('should throw undefined for an unsupported number of players', () => {
+        expect(() => {
+            defaultRuleForNumberOfPlayer(4)
+        }).toThrow()
     });
 });
