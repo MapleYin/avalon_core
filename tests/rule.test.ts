@@ -1,4 +1,4 @@
-import { defaultRuleForNumberOfPlayer, TRule } from '../src/rule';
+import { defaultRuleForNumberOfPlayer, SupportNumberOfPlayer, TRule } from '../src/rule';
 
 describe('defaultRuleForNumberOfPlayer', () => {
     it('should return the correct rule for 5 players', () => {
@@ -76,4 +76,9 @@ describe('defaultRuleForNumberOfPlayer', () => {
             defaultRuleForNumberOfPlayer(4)
         }).toThrow()
     });
+
+    it('should return support ', () => {
+        const support = SupportNumberOfPlayer()
+        expect(support).toEqual([5, 6, 7, 8, 9, 10])
+    })
 });
