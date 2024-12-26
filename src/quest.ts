@@ -100,6 +100,7 @@ export const CreateQuests = (rule: TRule, leader: number): TQuest[] => {
         throw new Error("Invalid leader parameter")
     }
     return [0, 1, 2, 3, 4].map(idx => {
+        const ladyOfTheLake = rule.hasLadyOfTheLake && idx < 2 ? previewPlayer(leader, rule.numberOfPlayer) : undefined
         return {
             teams: idx === 0 ? [{
                 leader: leader,
@@ -107,7 +108,7 @@ export const CreateQuests = (rule: TRule, leader: number): TQuest[] => {
                 members: []
             }] : [],
             numberOfMembers: rule.quest.each[idx].numberOfMebers,
-            ladyOfTheLake: rule.hasLadyOfTheLake ? previewPlayer(leader, rule.numberOfPlayer) : undefined,
+            ladyOfTheLake,
             state: idx === 0 ? "inProgress" : "notStarted"
         }
     })

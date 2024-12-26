@@ -1,4 +1,4 @@
-import { Create, UpdateRecentTeamMember, UpdateRecentTeamVote, UpdateResentQuestVote, SetNextLadyOfTheLake, TAvalon, Assassinate } from "../src/avalon"
+import { Create, UpdateRecentTeamMember, UpdateRecentTeamVote, UpdateResentQuestVote, SetNextLadyOfTheLake, TAvalon, Assassinate, ChangeToAssassinate } from "../src/avalon"
 import { TQuest, TTeam } from "../src/quest"
 import { defaultRuleForNumberOfPlayer, TRule } from "../src/rule"
 
@@ -84,6 +84,23 @@ describe("Avalon Game", () => {
         expect(game.quests[1].nextLadyOfTheLake).toBe(nextLadyOfTheLake)
         expect(game.quests[2].ladyOfTheLake).toBe(nextLadyOfTheLake)
         expect(game.stage).toBe("team")
+    })
+
+    it("should not change to ladyOfTheLake stage", () => {
+        const rule = defaultRuleForNumberOfPlayer(5)!
+        const game = Create(rule)
+
+        runQuest(game, rule, [{
+            member: [0, 1],
+            teamVotes: createTeamVotes(rule.numberOfPlayer, true),
+            questVotes: [true, false]
+        }, {
+            member: [2, 3, 1],
+            teamVotes: createTeamVotes(rule.numberOfPlayer, true),
+            questVotes: [true, false, true]
+        }])
+        expect(game.stage).not.toBe("ladyOfTheLake")
+        expect(() => SetNextLadyOfTheLake(game, rule, 1)).toThrow()
     })
 
     it("quest[false, false, false] evil win", () => {
@@ -190,5 +207,12 @@ describe("Avalon Game", () => {
 
         expect(game.result).toBe("evilWin")
         expect(game.stage).toBe("end")
+    })
+
+    it("morgana should be assasion ", () => {
+        const rule = defaultRuleForNumberOfPlayer(10, "rule1")!
+        expect(rule.assassin).toBe("morgana")
+        const rule1 = defaultRuleForNumberOfPlayer(10)!
+        expect(rule1.assassin).toBe("assassin")
     })
 })

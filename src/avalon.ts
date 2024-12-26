@@ -86,6 +86,11 @@ export const UpdateRecentTeamMember = (avalon: TAvalon, members: TTeam["members"
     if (containInvalidMember) {
         throw new Error("Invalid team members")
     }
+
+    if (typeof team.excalibur === "number" && !members.includes(team.excalibur)) {
+        team.excalibur = undefined
+    }
+    
     team.members = members
 }
 
