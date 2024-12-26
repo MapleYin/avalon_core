@@ -11,13 +11,15 @@ const createTeamVotes = (count: number, success: boolean): TTeam["votes"] => {
 type TStep = {
     member: number[]
     teamVotes: TTeam["votes"]
-    questVotes: boolean[]
+    questVotes?: boolean[]
 }
 const runQuest = (game: TAvalon, rule: TRule, step: TStep[]) => {
     step.forEach(({ member, teamVotes, questVotes }) => {
         UpdateRecentTeamMember(game, member)
         UpdateRecentTeamVote(game, rule, teamVotes)
-        UpdateResentQuestVote(game, rule, questVotes)
+        if (questVotes) {
+            UpdateResentQuestVote(game, rule, questVotes)
+        }
     })
 }
 
@@ -66,7 +68,6 @@ describe("Avalon Game", () => {
         const rule = defaultRuleForNumberOfPlayer(5)!
         rule.hasLadyOfTheLake = true
         const game = Create(rule)
-        const nextLadyOfTheLake = 2
 
         runQuest(game, rule, [{
             member: [0, 1],
@@ -77,9 +78,91 @@ describe("Avalon Game", () => {
             teamVotes: createTeamVotes(rule.numberOfPlayer, true),
             questVotes: [true, false, true]
         }])
+        const nextLadyOfTheLake = (game.quests[0].teams[0].leader + 1) % rule.numberOfPlayer
         expect(game.stage).toBe("ladyOfTheLake")
         SetNextLadyOfTheLake(game, rule, nextLadyOfTheLake)
         expect(game.quests[1].nextLadyOfTheLake).toBe(nextLadyOfTheLake)
+        expect(game.quests[2].ladyOfTheLake).toBe(nextLadyOfTheLake)
         expect(game.stage).toBe("team")
+    })
+
+    it("quest[false, false, false] evil win", () => {
+        const rule = defaultRuleForNumberOfPlayer(5)!
+        const game = Create(rule)
+
+        runQuest(game, rule, [{
+            member: [0, 1],
+            teamVotes: createTeamVotes(rule.numberOfPlayer, true),
+            questVotes: [false, false]
+        }, {
+            member: [2, 3, 1],
+            teamVotes: createTeamVotes(rule.numberOfPlayer, true),
+            questVotes: [false, false, false]
+        }, {
+            member: [4, 1],
+            teamVotes: createTeamVotes(rule.numberOfPlayer, true),
+            questVotes: [false, false]
+        }])
+
+        expect(game.result).toBe("evilWin")
+        expect(game.stage).toBe("end")
+    })
+
+    it("team[false, false, false, false, false] evil win", () => {
+        const rule = defaultRuleForNumberOfPlayer(5)!
+        const game = Create(rule)
+
+        runQuest(game, rule, [{
+            member: [0, 1],
+            teamVotes: createTeamVotes(rule.numberOfPlayer, false),
+        }, {
+            member: [0, 1],
+            teamVotes: createTeamVotes(rule.numberOfPlayer, false),
+        }, {
+            member: [0, 1],
+            teamVotes: createTeamVotes(rule.numberOfPlayer, false),
+        }, {
+            member: [0, 1],
+            teamVotes: createTeamVotes(rule.numberOfPlayer, false),
+        }, {
+            member: [0, 1],
+            teamVotes: createTeamVotes(rule.numberOfPlayer, false),
+        },])
+
+        expect(game.result).toBe("evilWin")
+        expect(game.stage).toBe("end")
+    })
+
+    it("team[false, false, false, false, true] next quest", () => {
+        const rule = defaultRuleForNumberOfPlayer(5)!
+        const game = Create(rule)
+
+        runQuest(game, rule, [{
+            member: [0, 1],
+            teamVotes: createTeamVotes(rule.numberOfPlayer, false),
+        }, {
+            member: [0, 1],
+            teamVotes: createTeamVotes(rule.numberOfPlayer, false),
+        }, {
+            member: [0, 1],
+            teamVotes: createTeamVotes(rule.numberOfPlayer, false),
+        }, {
+            member: [0, 1],
+            teamVotes: createTeamVotes(rule.numberOfPlayer, false),
+        }, {
+            member: [0, 1],
+            teamVotes: createTeamVotes(rule.numberOfPlayer, true),
+            questVotes: [true, true]
+        },])
+
+        expect(game.stage).toBe("team")
+    })
+
+    it("should have lancelot", () => {
+        const rule = defaultRuleForNumberOfPlayer(7, "rule1")!
+        const game = Create(rule)
+        expect(game.lancelotSwitch).toBeDefined()
+        expect(game.players.find(player => player.key === "lancelot_good")).toBeDefined()
+        expect(game.players.find(player => player.key === "lancelot_evil")).toBeDefined()
     })
 })

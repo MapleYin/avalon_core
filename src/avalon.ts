@@ -22,6 +22,20 @@ export type TAvalon = {
     players: { key: TCharacterKey, alignment: TAlignment }[]
 }
 
+/**
+ * Creates a new Avalon game with the specified rules.
+ *
+ * @param rule - The rules of the game.
+ * @returns The initial state of the Avalon game.
+ * 
+ * This function performs the following actions:
+ * 1. Validates the Lancelot configuration.
+ * 2. Randomizes the characters for the players.
+ * 3. Creates the quests for the game.
+ * 4. Sets the initial stage to "team".
+ * 5. Sets the initial leader for the game.
+ * 6. Returns the initial state of the Avalon game.
+ */
 export const Create = (rule: TRule): TAvalon => {
     if (typeof rule.lancelot === "string" && (!["rule1", "rule2", "rule3"].includes(rule.lancelot) || rule.numberOfPlayer < 7)) {
         throw new Error("Invalid lancelot config")
@@ -184,5 +198,21 @@ export const SetNextLadyOfTheLake = (avalon: TAvalon, rule: TRule, nextLadyOfThe
     lastFinishedQuest.nextLadyOfTheLake = nextLadyOfTheLake
     avalon.stage = "team"
     avalon.quests[questIdx + 1].state = "inProgress"
+    avalon.quests[questIdx + 1].ladyOfTheLake = nextLadyOfTheLake
     CreateNextTeam(avalon.quests, rule)
+}
+
+/**
+ * Sets the Excalibur for the Avalon game.
+ *
+ * @param avalon - The current state of the Avalon game.
+ * @param excalibur - The player number to be the next Excalibur.
+ * @throws Will throw an error if there is no recent team.
+ */
+export const SetExcalibur = (avalon: TAvalon, excalibur: number) => {
+    const recentTeam = RecentTeam(avalon.quests)
+    if (!recentTeam) {
+        throw new Error("No recent team")
+    }
+    recentTeam.excalibur = excalibur
 }

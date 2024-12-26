@@ -156,6 +156,12 @@ export const FirstUnStartedQuest = (quests: TQuest[]) => {
     return quests.find(q => q.state === "notStarted")
 }
 
+/**
+ * Updates the recent team members in the game.
+ * @param quests The array of quests.
+ * @param members The seat numbers of the team members.
+ * @throws Will throw an error if the recent team is not found.
+ */
 export const CreateNextTeam = (quests: TQuest[], rule: TRule) => {
     if (!CanCreateNewTeam(quests, rule)) {
         throw new Error("Cannot create new team")
@@ -177,6 +183,23 @@ export const CreateNextTeam = (quests: TQuest[], rule: TRule) => {
     })
 }
 
+
+/**
+ * Determines if a new team can be created based on the given quests and rule.
+ *
+ * @param quests - An array of quests of type `TQuest`.
+ * @param rule - The rule of type `TRule` that defines the conditions for creating a new team.
+ * @returns A boolean indicating whether a new team can be created.
+ *
+ * The function checks the mode of the quest team in the rule:
+ * - If the mode is "each", it checks if there is an in-progress quest. If not, it checks for an unstarted quest.
+ *   If there is an unstarted quest, it returns true. If the number of teams in the in-progress quest
+ *   exceeds the maximum count of summon teams defined in the rule, it returns false.
+ * - If the mode is "whole", it calculates the total number of teams across all quests that are not in the "notStarted" state.
+ *   If this total exceeds the maximum count of summon teams defined in the rule, it returns false.
+ * 
+ * In all other cases, it returns true.
+ */
 export const CanCreateNewTeam = (quests: TQuest[], rule: TRule) => {
     if (rule.quest.team.mode === "each") {
         const quest = InProgressQuest(quests)

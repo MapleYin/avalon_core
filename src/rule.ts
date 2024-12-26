@@ -14,31 +14,31 @@ export type TRule = {
     /**
      * The characters involved in the game.
      */
-    characters: TCharacterKey[];
+    readonly characters: TCharacterKey[];
 
     /**
      * The key of the assassin character.
      */
-    assassin: TCharacterKey;
+    readonly assassin: TCharacterKey;
 
     /**
      * The visibility rules for the characters.
      */
-    characterVisibilitiesRules: TVisibilityRule[];
+    readonly characterVisibilitiesRules: TVisibilityRule[];
 
     /**
      * The number of players in the game.
      */
-    numberOfPlayer: number;
+    readonly numberOfPlayer: number;
 
     /**
      * The quest details for the game.
      */
-    quest: {
+    readonly quest: {
         /**
          * The configuration for each quest.
          */
-        each: {
+        readonly each: {
             /**
              * The number of members required for the quest.
              */
@@ -53,7 +53,7 @@ export type TRule = {
         /**
          * The team configuration for the game.
          */
-        team: {
+        readonly team: {
             /**
              * The maximum count of summon teams.
              */
@@ -79,7 +79,7 @@ export type TRule = {
     /**
      * The rule for Lancelot.
      */
-    lancelot?: "rule1" | "rule2" | "rule3";
+    readonly lancelot?: "rule1" | "rule2" | "rule3";
 }
 
 export const RandomLancelotSwitchForRule1 = () => {
@@ -109,15 +109,16 @@ export const lancelotVisibilityRule: TVisibilityRule = {
     canSee: ["lancelot_good", "lancelot_evil"]
 }
 
-export const defaultRuleForNumberOfPlayer = (numberOfPlayer: number): TRule | undefined => {
-    const rule = innerRules.find(item => item.numberOfPlayer === numberOfPlayer)
+export const defaultRuleForNumberOfPlayer = (numberOfPlayer: number, lancelotRule?: TRule["lancelot"]): TRule | undefined => {
+    const rule = innerRules.find(item => item.numberOfPlayer === numberOfPlayer && (lancelotRule ? item.hasLancelot : true))
     if (!rule) {
         return
     }
     return {
-        assassin: "assassin",
+        assassin: rule.assassinate || "assassin",
         characters: rule.characters,
         numberOfPlayer,
+        lancelot: lancelotRule,
         characterVisibilitiesRules: defaultVisibilityRules,
         quest: {
             team: {
@@ -129,7 +130,15 @@ export const defaultRuleForNumberOfPlayer = (numberOfPlayer: number): TRule | un
     }
 }
 
-const innerRules: { numberOfPlayer: number, characters: TCharacterKey[], quests: { numberOfMebers: number, needTwoFailure?: true }[] }[] = [{
+type TInnerRule = {
+    numberOfPlayer: number;
+    hasLancelot?: true;
+    characters: TCharacterKey[];
+    assassinate?: TCharacterKey;
+    quests: { numberOfMebers: number, needTwoFailure?: true }[];
+}
+
+const innerRules: TInnerRule[] = [{
     numberOfPlayer: 5,
     characters: ["merlin", "percival", "loyalServant", "morgana", "assassin"],
     quests: [
@@ -160,8 +169,30 @@ const innerRules: { numberOfPlayer: number, characters: TCharacterKey[], quests:
         { numberOfMebers: 4 }
     ]
 }, {
+    numberOfPlayer: 7,
+    hasLancelot: true,
+    characters: ["merlin", "percival", "loyalServant", "lancelot_good", "morgana", "assassin", "lancelot_evil"],
+    quests: [
+        { numberOfMebers: 2 },
+        { numberOfMebers: 3 },
+        { numberOfMebers: 3 },
+        { numberOfMebers: 4, needTwoFailure: true },
+        { numberOfMebers: 4 }
+    ]
+}, {
     numberOfPlayer: 8,
     characters: ["merlin", "percival", "loyalServant", "loyalServant", "loyalServant", "morgana", "assassin", "minion"],
+    quests: [
+        { numberOfMebers: 3 },
+        { numberOfMebers: 4 },
+        { numberOfMebers: 4 },
+        { numberOfMebers: 5, needTwoFailure: true },
+        { numberOfMebers: 5 }
+    ]
+}, {
+    numberOfPlayer: 8,
+    hasLancelot: true,
+    characters: ["merlin", "percival", "loyalServant", "loyalServant", "lancelot_good", "morgana", "assassin", "lancelot_evil"],
     quests: [
         { numberOfMebers: 3 },
         { numberOfMebers: 4 },
@@ -180,6 +211,17 @@ const innerRules: { numberOfPlayer: number, characters: TCharacterKey[], quests:
         { numberOfMebers: 5 }
     ]
 }, {
+    numberOfPlayer: 9,
+    hasLancelot: true,
+    characters: ["merlin", "percival", "loyalServant", "loyalServant", "loyalServant", "lancelot_good", "morgana", "assassin", "lancelot_evil"],
+    quests: [
+        { numberOfMebers: 3 },
+        { numberOfMebers: 4 },
+        { numberOfMebers: 4 },
+        { numberOfMebers: 5, needTwoFailure: true },
+        { numberOfMebers: 5 }
+    ]
+}, {
     numberOfPlayer: 10,
     characters: ["merlin", "percival", "loyalServant", "loyalServant", "loyalServant", "loyalServant", "mordred", "morgana", "assassin", "oberon"],
     quests: [
@@ -189,5 +231,40 @@ const innerRules: { numberOfPlayer: number, characters: TCharacterKey[], quests:
         { numberOfMebers: 5, needTwoFailure: true },
         { numberOfMebers: 5 }
     ]
+}, {
+    numberOfPlayer: 10,
+    hasLancelot: true,
+    assassinate: "morgana",
+    characters: ["merlin", "percival", "loyalServant", "loyalServant", "loyalServant", "lancelot_good", "mordred", "morgana", "lancelot_evil", "oberon"],
+    quests: [
+        { numberOfMebers: 3 },
+        { numberOfMebers: 4 },
+        { numberOfMebers: 4 },
+        { numberOfMebers: 5, needTwoFailure: true },
+        { numberOfMebers: 5 }
+    ]
+}, {
+    numberOfPlayer: 11,
+    hasLancelot: true,
+    assassinate: "morgana",
+    characters: ["merlin", "percival", "loyalServant", "loyalServant", "loyalServant", "loyalServant", "lancelot_good", "mordred", "morgana", "lancelot_evil", "assassin"],
+    quests: [
+        { numberOfMebers: 3 },
+        { numberOfMebers: 4 },
+        { numberOfMebers: 5 },
+        { numberOfMebers: 6, needTwoFailure: true },
+        { numberOfMebers: 6 }
+    ]
+}, {
+    numberOfPlayer: 12,
+    hasLancelot: true,
+    assassinate: "morgana",
+    characters: ["merlin", "percival", "loyalServant", "loyalServant", "loyalServant", "loyalServant", "lancelot_good", "mordred", "morgana", "lancelot_evil", "oberon", "assassin"],
+    quests: [
+        { numberOfMebers: 3 },
+        { numberOfMebers: 4 },
+        { numberOfMebers: 5 },
+        { numberOfMebers: 6, needTwoFailure: true },
+        { numberOfMebers: 6 }
+    ]
 }]
-
