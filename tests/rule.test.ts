@@ -80,5 +80,7 @@ describe('defaultRuleForNumberOfPlayer', () => {
     it('should return support ', () => {
         const support = SupportNumberOfPlayer()
         expect(support).toEqual([5, 6, 7, 8, 9, 10])
+        const lancelotSupport = SupportNumberOfPlayer(true)
+        expect(lancelotSupport).toEqual([7, 8, 9, 10, 11, 12])
     })
 });

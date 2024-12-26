@@ -117,11 +117,14 @@ export const defaultRuleForNumberOfPlayer = (numberOfPlayer: number, lancelotRul
     if (!rule) {
         throw new Error(`no suit rule for numberOfPlayer:${numberOfPlayer} lancelotRule:${lancelotRule}`)
     }
+    const extra: Record<string, any> = {}
+    if (lancelotRule) {
+        extra.lancelot = lancelotRule
+    }
     const result: TRule = {
         assassin: rule.assassinate || "assassin",
         characters: rule.characters,
         numberOfPlayer,
-        lancelot: lancelotRule,
         characterVisibilitiesRules: defaultVisibilityRules,
         quest: {
             team: {
@@ -129,7 +132,8 @@ export const defaultRuleForNumberOfPlayer = (numberOfPlayer: number, lancelotRul
                 mode: "each"
             },
             each: rule.quests
-        }
+        },
+        ...extra
     }
     return result
 }
