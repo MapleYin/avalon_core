@@ -260,7 +260,7 @@ export const SetExcalibur = (avalon: TAvalon, excalibur: number) => {
  * console.log(avalonGame.result); // "evilWin"
  * ```
  */
-export const assassinate = (avalon: TAvalon, kill: number) => {
+export const Assassinate = (avalon: TAvalon, kill: number) => {
     if (avalon.stage !== "assassinate") {
         throw new Error("Invalid stage")
     }
