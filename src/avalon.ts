@@ -1,6 +1,6 @@
 import { Characters, TAlignment, TCharacterKey } from "./character"
 import { CanCreateNewTeam, CreateNextTeam, CreateQuests, InProgressQuest, LastFinishedQuest, RecentTeam, TQuest, TTeam } from "./quest"
-import { defaultRuleForNumberOfPlayer, lancelotVisibilityRule, RandomLancelotSwitchForRule1, RandomLancelotSwitchForRule2, TRule } from "./rule"
+import { lancelotVisibilityRule, RandomLancelotSwitchForRule1, RandomLancelotSwitchForRule2, TRule } from "./rule"
 import { randomArray, randomNumberFormRange } from "./tools"
 
 /**
@@ -90,7 +90,7 @@ export const UpdateRecentTeamMember = (avalon: TAvalon, members: TTeam["members"
     if (typeof team.excalibur === "number" && !members.includes(team.excalibur)) {
         team.excalibur = undefined
     }
-    
+
     team.members = members
 }
 
