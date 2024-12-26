@@ -1,5 +1,5 @@
-import { TCharacterKey } from "./character"
-import { randomArray } from "./tools";
+import { TCharacterKey } from './character';
+import { randomArray } from './tools';
 
 type TVisibilityRule = {
     title: string;
@@ -279,5 +279,5 @@ const innerRules: TInnerRule[] = [{
  * @returns The number of players that are supported.
  */
 export const SupportNumberOfPlayer = (hasLancelot: boolean = false) => {
-    return innerRules.filter(i => i.hasLancelot === hasLancelot).map(i => i.numberOfPlayer)
+    return innerRules.filter(i => i.hasLancelot && hasLancelot).map(i => i.numberOfPlayer)
 }
