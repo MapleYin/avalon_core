@@ -1,6 +1,6 @@
 import { Characters, TAlignment, TCharacterKey } from "./character"
 import { CanCreateNewTeam, CreateNextTeam, CreateQuests, InProgressQuest, LastFinishedQuest, RecentTeam, TQuest, TTeam } from "./quest"
-import { lancelotVisibilityRule, RandomLancelotSwitchForRule1, RandomLancelotSwitchForRule2, TRule } from "./rule"
+import { isLancelot, lancelotVisibilityRule, RandomLancelotSwitchForRule1, RandomLancelotSwitchForRule2, TRule } from "./rule"
 import { randomArray, randomNumberFormRange } from "./tools"
 
 /**
@@ -19,6 +19,7 @@ export type TAvalon = {
     stage: "quest" | "team" | "ladyOfTheLake" | "assassinate" | "end",
     result?: "goodWin" | "evilWin"
     lancelotSwitch?: boolean[]
+    lanceLotDidSwitchCount?: number
     players: { key: TCharacterKey, alignment: TAlignment }[]
     kill?: number
 }
@@ -51,14 +52,22 @@ export const Create = (rule: TRule): TAvalon => {
         rule.characterVisibilitiesRules.push(lancelotVisibilityRule)
     }
     const firstLeader = randomNumberFormRange(0, rule.numberOfPlayer - 1)
-    return {
+    const avalon: TAvalon = {
         quests: CreateQuests(rule, firstLeader),
         stage: "team",
-        players: randomCharacters.map(characterKey => {
-            return Characters.find(character => character.key === characterKey)!
+        players: randomCharacters.flatMap(characterKey => {
+            const character = Characters.find(character => character.key === characterKey)
+            if (!character) {
+                return []
+            }
+            return { ...character }
         }),
         lancelotSwitch
-    }
+    };
+
+    updateLancelotAlignment(avalon, rule)
+
+    return avalon;
 }
 
 /**
@@ -140,6 +149,8 @@ export const UpdateRecentTeamVote = (avalon: TAvalon, rule: TRule, votes: TTeam[
         avalon.stage = "team"
         /// create next team
         CreateNextTeam(avalon.quests, rule)
+        /// update Lancelot alignment if needed
+        updateLancelotAlignment(avalon, rule)
     }
 }
 
@@ -198,6 +209,8 @@ export const UpdateResentQuestVote = (avalon: TAvalon, rule: TRule, votes: boole
             avalon.stage = "team"
             avalon.quests[questIdx + 1].state = "inProgress"
             CreateNextTeam(avalon.quests, rule)
+            /// update Lancelot alignment if needed
+            updateLancelotAlignment(avalon, rule)
         }
     }
 }
@@ -228,6 +241,8 @@ export const SetNextLadyOfTheLake = (avalon: TAvalon, rule: TRule, nextLadyOfThe
     avalon.quests[questIdx + 1].state = "inProgress"
     avalon.quests[questIdx + 1].ladyOfTheLake = nextLadyOfTheLake
     CreateNextTeam(avalon.quests, rule)
+    /// update Lancelot alignment if needed
+    updateLancelotAlignment(avalon, rule)
 }
 
 /**
@@ -286,4 +301,55 @@ export const Assassinate = (avalon: TAvalon, kill: number) => {
     const target = avalon.players[kill]
     avalon.stage = "end"
     avalon.result = target.key === "merlin" ? "evilWin" : "goodWin"
+}
+
+/**
+ * Updates the alignment of Lancelot based on the specified rule.
+ *
+ * @param avalon - The Avalon game state object.
+ * @param rule - The rule object that specifies how Lancelot's alignment should be updated.
+ *
+ * The function handles two rules for Lancelot's alignment switch:
+ * - "rule1": Lancelot switches alignment at the beginning of the third quest.
+ * - "rule2": Lancelot switches alignment at the beginning of the game.
+ *
+ * If the rule is not "rule1" or "rule2", the function returns without making any changes.
+ * If the Lancelot switch is not defined in the Avalon game state, an error is thrown.
+ *
+ * The function calculates the number of times Lancelot should have switched alignment
+ * based on the specified rule and the current state of the game. If the number of
+ * switches is odd, Lancelot's alignment is toggled for all players who are Lancelot.
+ *
+ * @throws {Error} If the Lancelot switch is not defined in the Avalon game state.
+ */
+const updateLancelotAlignment = (avalon: TAvalon, rule: TRule) => {
+    if (rule.lancelot !== "rule1" && rule.lancelot !== "rule2") {
+        return;
+    }
+    const lancelotSwitch = avalon.lancelotSwitch;
+
+    if (!lancelotSwitch) {
+        throw new Error("No lancelot switch")
+    }
+    let wantSwitchCount = 0;
+    if (rule.lancelot === "rule1") {
+        /// Rule 1: Lancelot switches alignment at the beginning of third quest.
+        const teams = avalon.quests.slice(2).flatMap(q => q.teams);
+        console.log(teams)
+        wantSwitchCount = lancelotSwitch.slice(0, teams.length).filter(v => v).length;
+        console.log(`wantSwitchCount: ${wantSwitchCount}`)
+    }
+    if (rule.lancelot === "rule2") {
+        /// Rule 2: Lancelot switches alignment at the beginning of the game.
+        wantSwitchCount = avalon.quests.filter(q => q.state === "inProgress" || q.state == "finished").length
+    }
+
+    const lanceLotDidSwitchCount = avalon.lanceLotDidSwitchCount || 0;
+
+    if ((wantSwitchCount - lanceLotDidSwitchCount) % 2 === 1) {
+        avalon.players.filter(p => isLancelot(p.key)).forEach(p => {
+            p.alignment = p.alignment === "good" ? "evil" : "good"
+        })
+        avalon.lanceLotDidSwitchCount = wantSwitchCount;
+    }
 }

@@ -82,11 +82,30 @@ export type TRule = {
     readonly lancelot?: "rule1" | "rule2" | "rule3";
 }
 
+/**
+ * Generates a random boolean value based on a predefined array.
+ * The array contains two `true` values and three `false` values.
+ * 
+ * @returns {boolean} A randomly selected boolean value from the array.
+ */
 export const RandomLancelotSwitchForRule1 = () => {
     return randomArray([true, true, false, false, false])
 }
+
+/**
+ * Generates a random array of boolean values based on a predefined distribution.
+ * The array contains 5 elements, randomly selected from the following distribution:
+ * - 2 `true` values
+ * - 5 `false` values
+ *
+ * @returns {boolean[]} An array of 5 boolean values.
+ */
 export const RandomLancelotSwitchForRule2 = () => {
     return randomArray([true, true, false, false, false, false, false]).slice(0, 5)
+}
+
+export const isLancelot = (character: TCharacterKey) => {
+    return character === "lancelot_good" || character === "lancelot_evil"
 }
 
 const defaultVisibilityRules: TVisibilityRule[] = [{
