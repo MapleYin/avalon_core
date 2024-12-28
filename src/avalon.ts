@@ -1,7 +1,12 @@
-import { Characters, TAlignment, TCharacterKey } from "./character"
-import { CanCreateNewTeam, CreateNextTeam, CreateQuests, InProgressQuest, LastFinishedQuest, RecentTeam, TQuest, TTeam } from "./quest"
-import { isLancelot, lancelotVisibilityRule, RandomLancelotSwitchForRule1, RandomLancelotSwitchForRule2, TRule } from "./rule"
-import { randomArray, randomNumberFormRange } from "./tools"
+import { Characters, TAlignment, TCharacterKey } from './character';
+import {
+    CanCreateNewTeam, CreateNextTeam, CreateQuests, InProgressQuest, LastFinishedQuest, RecentTeam,
+    TQuest, TTeam
+} from './quest';
+import {
+    isLancelot, RandomLancelotSwitchForRule1, RandomLancelotSwitchForRule2, TRule
+} from './rule';
+import { randomArray, randomNumberFormRange } from './tools';
 
 /**
  * Represents the state of an Avalon game.
@@ -48,8 +53,6 @@ export const Create = (rule: TRule): TAvalon => {
         lancelotSwitch = RandomLancelotSwitchForRule1()
     } else if (rule.lancelot === "rule2") {
         lancelotSwitch = RandomLancelotSwitchForRule2()
-    } else if (rule.lancelot === "rule3") {
-        rule.characterVisibilitiesRules.push(lancelotVisibilityRule)
     }
     const firstLeader = randomNumberFormRange(0, rule.numberOfPlayer - 1)
     const avalon: TAvalon = {

@@ -122,7 +122,7 @@ const defaultVisibilityRules: TVisibilityRule[] = [{
     canSee: ["morgana", "assassin", "mordred", "minion", "lancelot_evil"]
 }]
 
-export const lancelotVisibilityRule: TVisibilityRule = {
+const lancelotVisibilityRule: TVisibilityRule = {
     title: "可看到的彼此",
     characters: ["lancelot_good", "lancelot_evil"],
     canSee: ["lancelot_good", "lancelot_evil"]
@@ -141,7 +141,7 @@ export const defaultRuleForNumberOfPlayer = (numberOfPlayer: number, lancelotRul
         characters: rule.characters,
         numberOfPlayer,
         lancelot: lancelotRule,
-        characterVisibilitiesRules: defaultVisibilityRules,
+        characterVisibilitiesRules: lancelotRule === "rule3" ? [...defaultVisibilityRules, lancelotVisibilityRule] : defaultVisibilityRules,
         quest: {
             team: {
                 maxCountOfSummonTeam: 5,
