@@ -1,4 +1,5 @@
-import { TRule } from "./rule"
+import { TRule } from './rule';
+
 /**
  * Represents a quest in the game.
  */
@@ -109,7 +110,8 @@ export const CreateQuests = (rule: TRule, leader: number): TQuest[] => {
             }] : [],
             numberOfMembers: rule.quest.each[idx].numberOfMebers,
             ladyOfTheLake,
-            state: idx === 0 ? "inProgress" : "notStarted"
+            state: idx === 0 ? "inProgress" : "notStarted",
+            needTwoFailure: rule.quest.each[idx].needTwoFailure
         }
     })
 }
