@@ -5,6 +5,7 @@ type TVisibilityRule = {
     title: string;
     characters: TCharacterKey[];
     canSee: TCharacterKey[];
+    canSeeCharacter?: TCharacterKey[];
 }
 
 /**
@@ -119,7 +120,8 @@ const defaultVisibilityRules: TVisibilityRule[] = [{
 }, {
     title: "可看到的队友",
     characters: ["morgana", "assassin", "mordred", "minion"],
-    canSee: ["morgana", "assassin", "mordred", "minion", "lancelot_evil"]
+    canSee: ["morgana", "assassin", "mordred", "minion", "lancelot_evil"],
+    canSeeCharacter: ["lancelot_evil"]
 }]
 
 const lancelotVisibilityRule: TVisibilityRule = {
