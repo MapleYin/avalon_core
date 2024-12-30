@@ -243,17 +243,21 @@ describe("Avalon Game", () => {
 
     })
 
-    // it("test lancelet switch rule2", () => {
-    //     const rule = defaultRuleForNumberOfPlayer(7, "rule2")
-    //     const game = Create(rule)
+    it("test lancelet switch rule2", () => {
+        const rule = defaultRuleForNumberOfPlayer(7, "rule2")
+        const game = Create(rule)
 
-    //     const lancelotGood = game.players.find(player => player.key === "lancelot_good")
-    //     const lancelotEvil = game.players.find(player => player.key === "lancelot_evil")
+        const lancelotGood = game.players.find(player => player.key === "lancelot_good")
+        const lancelotEvil = game.players.find(player => player.key === "lancelot_evil")
 
-    //     game.lancelotSwitch?[0] === true
+        expect(game.lancelotSwitch).toBeDefined()
 
-    //     expect(lancelotGood?.alignment).toBe("evil")
-    //     expect(lancelotEvil?.alignment).toBe("good")
-
-    // })
+        if (game.lancelotSwitch![0]) {
+            expect(lancelotGood?.alignment).toBe("evil")
+            expect(lancelotEvil?.alignment).toBe("good")
+        } else {
+            expect(lancelotGood?.alignment).toBe("good")
+            expect(lancelotEvil?.alignment).toBe("evil")
+        }
+    })
 })

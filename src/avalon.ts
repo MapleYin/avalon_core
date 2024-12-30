@@ -174,7 +174,7 @@ export const UpdateRecentTeamVote = (avalon: TAvalon, rule: TRule, votes: TTeam[
  * 5. Checks if the game has ended by counting the number of successful and failed quests.
  * 6. Updates the game stage based on the results of the quests and game rules.
  */
-export const UpdateResentQuestVote = (avalon: TAvalon, rule: TRule, votes: boolean[]) => {
+export const UpdateResentQuestVote = (avalon: TAvalon, rule: TRule, votes: boolean[], excaliburTarget?: number) => {
     if (avalon.stage !== "quest") {
         throw new Error("Invalid stage")
     }
@@ -186,10 +186,11 @@ export const UpdateResentQuestVote = (avalon: TAvalon, rule: TRule, votes: boole
     if (votes.length != rule.quest.each[questIdx].numberOfMebers) {
         throw new Error("Invalid vote count")
     }
+    quest.excaliburTarget = excaliburTarget
     const failuerCount = votes.filter(vote => !vote).length
     const needTwoFailure = rule.quest.each[questIdx].needTwoFailure
     const failed = failuerCount >= (needTwoFailure ? 2 : 1)
-
+    
     quest.result = {
         success: !failed,
         votes
@@ -338,13 +339,12 @@ const updateLancelotAlignment = (avalon: TAvalon, rule: TRule) => {
     if (rule.lancelot === "rule1") {
         /// Rule 1: Lancelot switches alignment at the beginning of third quest.
         const teams = avalon.quests.slice(2).flatMap(q => q.teams);
-        console.log(teams)
         wantSwitchCount = lancelotSwitch.slice(0, teams.length).filter(v => v).length;
-        console.log(`wantSwitchCount: ${wantSwitchCount}`)
     }
     if (rule.lancelot === "rule2") {
         /// Rule 2: Lancelot switches alignment at the beginning of the game.
-        wantSwitchCount = avalon.quests.filter(q => q.state === "inProgress" || q.state == "finished").length
+        const step = avalon.quests.filter(q => q.state === "inProgress" || q.state == "finished").length
+        wantSwitchCount = lancelotSwitch.slice(0, step).filter(v => v).length 
     }
 
     const lanceLotDidSwitchCount = avalon.lanceLotDidSwitchCount || 0;
