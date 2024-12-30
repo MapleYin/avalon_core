@@ -34,7 +34,8 @@ describe("CreateQuests", () => {
         const leader = 0;
         const quests = CreateQuests(rule, leader);
 
-        expect(quests[0].ladyOfTheLake).toBe(4); // previous player of leader 0 in a 5 player game
+        expect(quests[0].ladyOfTheLake).toBeUndefined();
+        expect(quests[1].ladyOfTheLake).toBe(4);
     });
 
     it("should not set ladyOfTheLake if rule hasLadyOfTheLake is false", () => {
