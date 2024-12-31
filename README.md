@@ -39,7 +39,7 @@ npm install
 Here's a basic example of how to create a new Avalon game instance, make a team, and vote on the team:
 
 ```typescript
-import { CreateAvalon, UpdateRecentTeamMember, UpdateRecentTeamVote } from './src';
+import { CreateAvalon, UpdateRecentTeamMember, UpdateRecentTeamVote, DefaultRuleForNumberOfPlayer } from './src';
 
 // Create a new Avalon game instance with 5 players
 const rule = DefaultRuleForNumberOfPlayer(5)
