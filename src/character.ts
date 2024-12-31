@@ -1,9 +1,14 @@
-const C = <T extends string, P extends "good" | "evil" >(key: T, alignment: P) => {
-    return {
-        key,
-        alignment
-    }
-}
+/**
+ * Creates an object representing a character with a specified key and alignment.
+ * This function creates a static key type and alignment type for the character.
+ *
+ * @template T - The type of the key, which extends string.
+ * @template P - The type of the alignment, which can be either "good" or "evil".
+ * @param {T} key - The unique identifier for the character.
+ * @param {P} alignment - The alignment of the character, either "good" or "evil".
+ * @returns {{ key: T, alignment: P }} An object containing the key and alignment of the character.
+ */
+const C = <T extends string, P extends "good" | "evil">(key: T, alignment: P) => ({ key, alignment })
 
 export const merlin = C('merlin', "good")
 export const percival = C('percival', "good")

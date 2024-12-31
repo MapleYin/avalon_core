@@ -1,6 +1,16 @@
 import { TCharacterKey } from './character';
 import { randomArray } from './tools';
 
+/**
+ * Represents a visibility rule in the game.
+ * 
+ * @typedef {Object} TVisibilityRule
+ * 
+ * @property {string} title - The title of the visibility rule.
+ * @property {TCharacterKey[]} characters - The characters to whom this rule applies.
+ * @property {TCharacterKey[]} canSee - The characters that can be seen by the characters in this rule.
+ * @property {TCharacterKey[]} [canSeeCharacter] - Optional property specifying additional characters that can be seen.
+ */
 type TVisibilityRule = {
     title: string;
     characters: TCharacterKey[];
@@ -108,7 +118,10 @@ export const RandomLancelotSwitchForRule2 = () => {
 export const isLancelot = (character: TCharacterKey) => {
     return character === "lancelot_good" || character === "lancelot_evil"
 }
-
+/**
+ * The default visibility rules for the characters.
+ * These rules are used to determine which characters can see each other.
+ */
 const defaultVisibilityRules: TVisibilityRule[] = [{
     title: "可看到的坏人",
     characters: ["merlin"],
@@ -124,17 +137,28 @@ const defaultVisibilityRules: TVisibilityRule[] = [{
     canSeeCharacter: ["lancelot_evil"]
 }]
 
+/**
+ * The visibility rule for Lancelot.
+ * This rule allows Lancelot to see other Lancelot characters.
+ */
 const lancelotVisibilityRule: TVisibilityRule = {
     title: "可看到的彼此",
     characters: ["lancelot_good", "lancelot_evil"],
     canSee: ["lancelot_good", "lancelot_evil"]
 }
 
+/**
+ * Creates a default rule for a specified number of players.
+ * 
+ * @param {number} numberOfPlayer - The number of players in the game.
+ * @param {TRule["lancelot"]} lancelotRule - The rule for Lancelot.
+ * @returns {TRule} The default rule for the specified number of players.
+ */
 export const defaultRuleForNumberOfPlayer = (numberOfPlayer: number, lancelotRule?: TRule["lancelot"]) => {
     if (lancelotRule && !["rule1", "rule2", "rule3"].includes(lancelotRule)) {
         throw new Error("error lancelot rule")
     }
-    const rule = innerRules.find(item => item.numberOfPlayer === numberOfPlayer && (lancelotRule ? item.hasLancelot : true))
+    const rule = innerRules.find(item => item.numberOfPlayer === numberOfPlayer && (lancelotRule ? item.hasLancelot : !item.hasLancelot))
     if (!rule) {
         throw new Error(`no suit rule for numberOfPlayer:${numberOfPlayer} lancelotRule:${lancelotRule}`)
     }
@@ -162,7 +186,11 @@ type TInnerRule = {
     assassinate?: TCharacterKey;
     quests: { numberOfMebers: number, needTwoFailure?: true }[];
 }
-
+/**
+ * The inner rules for the game.
+ * These rules are used to determine the characters and quests for each game.
+ * The rules are based on the number of players in the game.
+ */
 const innerRules: TInnerRule[] = [{
     numberOfPlayer: 5,
     characters: ["merlin", "percival", "loyalServant", "morgana", "assassin"],

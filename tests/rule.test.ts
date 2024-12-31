@@ -17,7 +17,8 @@ describe('defaultRuleForNumberOfPlayer', () => {
             }, {
                 title: "可看到的队友",
                 characters: ["morgana", "assassin", "mordred", "minion"],
-                canSee: ["morgana", "assassin", "mordred", "minion", "lancelot_evil"]
+                canSee: ["morgana", "assassin", "mordred", "minion", "lancelot_evil"],
+                canSeeCharacter: ["lancelot_evil"]
             }],
             quest: {
                 team: {
@@ -52,7 +53,8 @@ describe('defaultRuleForNumberOfPlayer', () => {
             }, {
                 title: "可看到的队友",
                 characters: ["morgana", "assassin", "mordred", "minion"],
-                canSee: ["morgana", "assassin", "mordred", "minion", "lancelot_evil"]
+                canSee: ["morgana", "assassin", "mordred", "minion", "lancelot_evil"],
+                canSeeCharacter: ["lancelot_evil"]
             }],
             quest: {
                 team: {
