@@ -299,7 +299,6 @@ const innerRules: TInnerRule[] = [{
 }, {
     numberOfPlayer: 11,
     hasLancelot: true,
-    assassinate: "morgana",
     characters: ["merlin", "percival", "loyalServant", "loyalServant", "loyalServant", "loyalServant", "lancelot_good", "mordred", "morgana", "lancelot_evil", "assassin"],
     quests: [
         { numberOfMebers: 3 },
@@ -311,7 +310,6 @@ const innerRules: TInnerRule[] = [{
 }, {
     numberOfPlayer: 12,
     hasLancelot: true,
-    assassinate: "morgana",
     characters: ["merlin", "percival", "loyalServant", "loyalServant", "loyalServant", "loyalServant", "lancelot_good", "mordred", "morgana", "lancelot_evil", "oberon", "assassin"],
     quests: [
         { numberOfMebers: 3 },
