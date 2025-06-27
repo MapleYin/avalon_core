@@ -33,6 +33,7 @@ export type TAvalon = {
  * Creates a new Avalon game with the specified rules.
  *
  * @param rule - The rules of the game.
+ * @param customCharacters - An optional array of character keys to use instead of randomizing.
  * @returns The initial state of the Avalon game.
  * 
  * This function performs the following actions:
@@ -43,11 +44,11 @@ export type TAvalon = {
  * 5. Sets the initial leader for the game.
  * 6. Returns the initial state of the Avalon game.
  */
-export const Create = (rule: TRule): TAvalon => {
+export const Create = (rule: TRule, customCharacters?: TCharacterKey[]): TAvalon => {
     if (typeof rule.lancelot === "string" && (!["rule1", "rule2", "rule3"].includes(rule.lancelot) || rule.numberOfPlayer < 7)) {
         throw new Error("Invalid lancelot config")
     }
-    const randomCharacters = randomArray(rule.characters)
+    const randomCharacters = customCharacters?.length === rule.characters.length ? customCharacters : randomArray(rule.characters)
     let lancelotSwitch: boolean[] | undefined
     if (rule.lancelot === "rule1") {
         lancelotSwitch = RandomLancelotSwitchForRule1()
