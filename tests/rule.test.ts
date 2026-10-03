@@ -86,3 +86,17 @@ describe('defaultRuleForNumberOfPlayer', () => {
         expect(lancelotSupport).toEqual([7, 8, 9, 10, 11, 12])
     })
 });
+
+describe('rule isolation', () => {
+    it('mutating a returned rule should not affect later rules', () => {
+        const rule = defaultRuleForNumberOfPlayer(7, "rule3")
+        rule.quest.each[0].numberOfMebers = 99
+        rule.characters.push("oberon")
+        rule.characterVisibilitiesRules[0].canSee.push("mordred")
+
+        const fresh = defaultRuleForNumberOfPlayer(7, "rule3")
+        expect(fresh.quest.each[0].numberOfMebers).toBe(2)
+        expect(fresh.characters.length).toBe(7)
+        expect(fresh.characterVisibilitiesRules[0].canSee).not.toContain("mordred")
+    })
+});

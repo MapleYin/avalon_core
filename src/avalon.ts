@@ -94,9 +94,10 @@ export const UpdateRecentTeamMember = (avalon: TAvalon, members: TTeam["members"
         throw new Error("Invalid number of team members")
     }
 
-    const containInvalidMember = members.some(v => typeof v != "number" || v >= avalon.players.length || v < 0)
+    const containInvalidMember = members.some(v => !isValidSeat(v, avalon.players.length))
+    const containDuplicateMember = new Set(members).size !== members.length
 
-    if (containInvalidMember) {
+    if (containInvalidMember || containDuplicateMember) {
         throw new Error("Invalid team members")
     }
 
@@ -134,8 +135,16 @@ export const UpdateRecentTeamVote = (avalon: TAvalon, rule: TRule, votes: TTeam[
     if (!quest || !team) {
         throw new Error("No in progress quest or team")
     }
+    if (team.members.length !== quest.numberOfMembers) {
+        throw new Error("Team members not set")
+    }
     if (votes.length != rule.numberOfPlayer) {
         throw new Error("Invalid vote count")
+    }
+    const containInvalidVoter = votes.some(v => typeof v.vote !== "boolean" || !isValidSeat(v.player, rule.numberOfPlayer))
+    const containDuplicateVoter = new Set(votes.map(v => v.player)).size !== votes.length
+    if (containInvalidVoter || containDuplicateVoter) {
+        throw new Error("Invalid voters")
     }
     team.votes = votes
 
@@ -268,7 +277,15 @@ export const SetExcalibur = (avalon: TAvalon, excalibur: number) => {
     recentTeam.excalibur = excalibur
 }
 
+/**
+ * Switches the game to the assassination stage (e.g. when evil reveals early).
+ *
+ * @throws {Error} If the game has already ended.
+ */
 export const ChangeToAssassinate = (avalon: TAvalon) => {
+    if (avalon.stage === "end") {
+        throw new Error("Invalid stage")
+    }
     avalon.stage = "assassinate"
 }
 
@@ -302,10 +319,20 @@ export const Assassinate = (avalon: TAvalon, kill: number) => {
     if (avalon.stage !== "assassinate") {
         throw new Error("Invalid stage")
     }
-    avalon.kill = kill
+    if (!isValidSeat(kill, avalon.players.length)) {
+        throw new Error("Invalid kill target")
+    }
     const target = avalon.players[kill]
+    avalon.kill = kill
     avalon.stage = "end"
     avalon.result = target.key === "merlin" ? "evilWin" : "goodWin"
+}
+
+/**
+ * Checks whether a value is an integer seat number in `[0, numberOfPlayer)`.
+ */
+const isValidSeat = (seat: unknown, numberOfPlayer: number): seat is number => {
+    return Number.isInteger(seat) && (seat as number) >= 0 && (seat as number) < numberOfPlayer
 }
 
 /**
