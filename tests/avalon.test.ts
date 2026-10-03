@@ -261,3 +261,66 @@ describe("Avalon Game", () => {
         }
     })
 })
+
+describe("Avalon input validation", () => {
+    const approvedRound = (game: TAvalon, rule: TRule, member: number[]) => {
+        UpdateRecentTeamMember(game, member)
+        UpdateRecentTeamVote(game, rule, createTeamVotes(rule.numberOfPlayer, true))
+        UpdateResentQuestVote(game, rule, member.map(() => true))
+    }
+
+    it("should reject duplicate or non-integer team members", () => {
+        const rule = defaultRuleForNumberOfPlayer(5)
+        const game = Create(rule)
+        expect(() => UpdateRecentTeamMember(game, [0, 0])).toThrow()
+        expect(() => UpdateRecentTeamMember(game, [NaN, 1])).toThrow()
+        expect(() => UpdateRecentTeamMember(game, [0, 1.5])).toThrow()
+        expect(() => UpdateRecentTeamMember(game, [0, 5])).toThrow()
+        expect(game.quests[0].teams[0].members).toEqual([])
+    })
+
+    it("should not allow voting before team members are set", () => {
+        const rule = defaultRuleForNumberOfPlayer(5)
+        const game = Create(rule)
+        expect(() => UpdateRecentTeamVote(game, rule, createTeamVotes(rule.numberOfPlayer, true))).toThrow()
+        expect(game.stage).toBe("team")
+    })
+
+    it("should reject duplicate or invalid voters", () => {
+        const rule = defaultRuleForNumberOfPlayer(5)
+        const game = Create(rule)
+        UpdateRecentTeamMember(game, [0, 1])
+        const sameVoter = Array.from({ length: 5 }, () => ({ player: 0, vote: true }))
+        expect(() => UpdateRecentTeamVote(game, rule, sameVoter)).toThrow()
+        const outOfRange = createTeamVotes(rule.numberOfPlayer, true).map((v, i) => i === 4 ? { ...v, player: 5 } : v)
+        expect(() => UpdateRecentTeamVote(game, rule, outOfRange)).toThrow()
+        expect(game.stage).toBe("team")
+        expect(game.quests[0].teams[0].votes).toEqual([])
+    })
+
+    it("should not change to assassinate after the game ended", () => {
+        const rule = defaultRuleForNumberOfPlayer(5)
+        const game = Create(rule)
+        approvedRound(game, rule, [0, 1])
+        approvedRound(game, rule, [0, 1, 2])
+        approvedRound(game, rule, [0, 1])
+        Assassinate(game, game.players.findIndex(p => p.key !== "merlin"))
+        expect(game.result).toBe("goodWin")
+
+        expect(() => ChangeToAssassinate(game)).toThrow()
+        expect(game.stage).toBe("end")
+        expect(game.result).toBe("goodWin")
+    })
+
+    it("should reject an invalid assassinate target without changing state", () => {
+        const rule = defaultRuleForNumberOfPlayer(5)
+        const game = Create(rule)
+        ChangeToAssassinate(game)
+        expect(() => Assassinate(game, 99)).toThrow()
+        expect(() => Assassinate(game, -1)).toThrow()
+        expect(() => Assassinate(game, 0.5)).toThrow()
+        expect(game.stage).toBe("assassinate")
+        expect(game.kill).toBeUndefined()
+        expect(game.result).toBeUndefined()
+    })
+})

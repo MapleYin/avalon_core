@@ -147,6 +147,13 @@ const lancelotVisibilityRule: TVisibilityRule = {
     canSee: ["lancelot_good", "lancelot_evil"]
 }
 
+const cloneVisibilityRule = (rule: TVisibilityRule): TVisibilityRule => ({
+    ...rule,
+    characters: [...rule.characters],
+    canSee: [...rule.canSee],
+    ...(rule.canSeeCharacter ? { canSeeCharacter: [...rule.canSeeCharacter] } : {})
+})
+
 /**
  * Creates a default rule for a specified number of players.
  * 
@@ -162,18 +169,20 @@ export const defaultRuleForNumberOfPlayer = (numberOfPlayer: number, lancelotRul
     if (!rule) {
         throw new Error(`no suit rule for numberOfPlayer:${numberOfPlayer} lancelotRule:${lancelotRule}`)
     }
+    const visibilityRules = lancelotRule === "rule3" ? [...defaultVisibilityRules, lancelotVisibilityRule] : defaultVisibilityRules
+    /// Copy everything so that mutating a returned rule never pollutes the shared tables
     const result: TRule = {
         assassin: rule.assassinate || "assassin",
-        characters: rule.characters,
+        characters: [...rule.characters],
         numberOfPlayer,
         lancelot: lancelotRule,
-        characterVisibilitiesRules: lancelotRule === "rule3" ? [...defaultVisibilityRules, lancelotVisibilityRule] : defaultVisibilityRules,
+        characterVisibilitiesRules: visibilityRules.map(cloneVisibilityRule),
         quest: {
             team: {
                 maxCountOfSummonTeam: 5,
                 mode: "each"
             },
-            each: rule.quests
+            each: rule.quests.map(q => ({ ...q }))
         }
     }
     return result
